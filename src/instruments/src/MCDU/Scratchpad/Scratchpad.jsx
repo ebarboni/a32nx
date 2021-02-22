@@ -16,14 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import './styles.scss';
-<<<<<<< HEAD
-
-const Scratchpad = () => (
-    <g id="title" transform="translate(0 1024)">
-        <text className="scratchpad"><tspan className="amber">SCRATCHPAD FIELD</tspan></text>
-    </g>
-);
-=======
 import '../Components/styles.scss';
 import { useContext } from 'react';
 import { RootContext } from '../RootContext.jsx';
@@ -37,5 +29,4 @@ const Scratchpad = () => {
         </div>
     );
 };
->>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 export default Scratchpad;

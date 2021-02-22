@@ -76,48 +76,6 @@ module.exports = {
         'react/jsx-uses-react': 'off',
         'react/react-in-jsx-scope': 'off',
 
-<<<<<<< HEAD
-        'camelcase': 'off',
-        'max-len': ['error', 200], // Temporary until we can refactor the Core
-        'no-console': 'off', // May need to disable this
-        'no-underscore-dangle': 'off',
-        'max-classes-per-file': 'off',
-        'no-plusplus': 'off',
-        'no-restricted-globals': 'off',
-        'no-bitwise': 'off',
-        'no-restricted-properties': 'off',
-        'no-floating-decimal': 'off',
-        'no-mixed-operators': 'off',
-        'no-shadow': 'off',
-        'no-param-reassign': 'off',
-        'default-case': 'off',
-        'no-undef': 'warn',
-        'no-continue': 'off',
-        'no-await-in-loop': 'off',
-        'no-throw-literal': 'off',
-        'no-use-before-define': 'off',
-        'eqeqeq': 'warn',
-        'consistent-return': 'warn',
-        'radix': 'off',
-        'prefer-destructuring': 'warn',
-        'no-empty': 'warn',
-        'no-useless-constructor': 'warn',
-        'no-fallthrough': 'warn',
-        'block-scoped-var': 'warn',
-        'react/prop-types': 'off',
-        'vars-on-top': 'warn',
-        'no-var': 'warn',
-        'no-redeclare': 'warn',
-        'prefer-rest-params': 'warn',
-        'import/extensions': [
-            'error',
-            'ignorePackages',
-            {
-                js: 'never',
-                jsx: 'always',
-            },
-        ],
-=======
         'import/extensions': 'off',
         'react/prop-types': 'off',
         'react/destructuring-assignment': 'off',
@@ -126,17 +84,10 @@ module.exports = {
         'max-len': ['error', { code: 128 }],
 
         'jsx-a11y/label-has-associated-control': 'off',
->>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
     },
     globals: {
         Simplane: 'readonly',
         SimVar: 'readonly',
-<<<<<<< HEAD
-        FlightPhase: 'readonly',
-        Coherent: 'readonly',
-        Avionics: 'readonly',
-=======
         Utils: 'readonly',
->>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
     },
 };

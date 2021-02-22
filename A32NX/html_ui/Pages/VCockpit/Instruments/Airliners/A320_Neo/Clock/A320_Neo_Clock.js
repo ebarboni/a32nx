@@ -10,6 +10,7 @@ class A320_Neo_Clock extends BaseAirliners {
         this.lastFlightTime = null;
         this.lastLocalTime = 0;
         this.lastResetVal = null;
+        this.updateThrottler = new UpdateThrottler(200);
     }
     get templateID() {
         return "A320_Neo_Clock";
@@ -28,7 +29,9 @@ class A320_Neo_Clock extends BaseAirliners {
     }
     onUpdate(_deltaTime) {
         super.onUpdate(_deltaTime);
-
+        if (this.updateThrottler.canUpdate(_deltaTime) === -1) {
+            return;
+        }
         const absTime = SimVar.GetGlobalVarValue("ABSOLUTE TIME", "Seconds");
         const lightsTest = SimVar.GetSimVarValue("L:XMLVAR_LTS_Test", "Bool");
         const lightsTestChanged = lightsTest !== this.lightsTest;
@@ -65,7 +68,7 @@ class A320_Neo_Clock extends BaseAirliners {
         }
         if (this.middleSelectorElem) {
             if (lightsTest) {
-                this.middleSelectorElem.textContent = "88:88";
+                this.middleSelectorElem.textContent = "88:88:";
                 this.middleSelectorElem2.textContent = "88";
             } else {
                 let currentDisplayTime = "";
@@ -80,7 +83,7 @@ class A320_Neo_Clock extends BaseAirliners {
                 }
                 if (currentDisplayTime !== this.lastDisplayTime || lightsTestChanged) {
                     this.lastDisplayTime = currentDisplayTime;
-                    this.middleSelectorElem.textContent = currentDisplayTime;
+                    this.middleSelectorElem.textContent = `${currentDisplayTime}:`;
                 }
                 if (currentDisplayTime2 !== this.lastDisplayTime2 || lightsTestChanged) {
                     this.lastDisplayTime2 = currentDisplayTime2;

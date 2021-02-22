@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import url('/Fonts/A32NX_Display_Common.css');
 @font-face {
   font-family: "Roboto";
@@ -51,4 +52,16 @@
 
 .magenta {
   fill: var(--mcduMagenta);
+=======
+//STYLING
+.title {
+  margin-bottom: 20px;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.title-text {
+  text-align: center;
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 }

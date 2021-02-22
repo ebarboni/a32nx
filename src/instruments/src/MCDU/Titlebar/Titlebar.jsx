@@ -16,10 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+<<<<<<< HEAD
 const Titlebar = () => (
     <g id="title" transform="translate(512 100)">
         <text className="title"><tspan className="green">TITLE FIELD</tspan></text>
     </g>
 );
+=======
+import './styles.scss';
+import { useContext } from 'react';
+import { RootContext } from '../RootContext.jsx';
+
+const Titlebar = () => {
+    const [, , title] = useContext(RootContext);
+
+    return (
+        <div className="title">
+            <p />
+            <p>{title}</p>
+            <p />
+        </div>
+    );
+};
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 
 export default Titlebar;

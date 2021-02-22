@@ -143,6 +143,23 @@ function combineGltf(pathA, pathB, outputPath) {
         gltfA.scenes[0].nodes.push(i + nodesCount);
     }
 
+    // Add animations
+    if (gltfB.animations) {
+        if (!gltfA.animations) {
+            gltfA.animations = [];
+        }
+        for (const animation of gltfB.animations) {
+            for (const channel of animation.channels) {
+                channel.target.node += nodesCount;
+            }
+            for (const sampler of animation.samplers) {
+                sampler.input += accessorsCount;
+                sampler.output += accessorsCount;
+            }
+            gltfA.animations.push(animation);
+        }
+    }
+
     // Adjust buffer size
     gltfA.buffers[0].byteLength += gltfB.buffers[0].byteLength;
 
@@ -184,19 +201,21 @@ function applyModifications(buffer, gltfPath, modifications) {
 const models = JSON.parse(fs.readFileSync(path.join(__dirname, 'models.json'), 'utf8'));
 const p = (n) => path.resolve(__dirname, n);
 for (const model of models) {
-    fs.copyFileSync(p(model.gltf), p(model.output.gltf));
-    if (model.modifications) {
-        const modifiedBin = applyModifications(
-            fs.readFileSync(p(model.bin)),
-            p(model.gltf),
-            model.modifications,
-        );
-        fs.writeFileSync(p(model.output.bin), modifiedBin);
-    } else {
-        fs.copyFileSync(p(model.bin), p(model.output.bin));
-    }
-    for (const addition of model.additions) {
-        combineGltf(p(model.output.gltf), p(addition.gltf), p(model.output.gltf));
-        fs.appendFileSync(p(model.output.bin), fs.readFileSync(p(addition.bin)));
+    for (let i = 0; i < model.gltf.length; i += 1) {
+        fs.copyFileSync(p(model.gltf[i]), p(model.output.gltf[i]));
+        if (model.modifications) {
+            const modifiedBin = applyModifications(
+                fs.readFileSync(p(model.bin[i])),
+                p(model.gltf[i]),
+                model.modifications,
+            );
+            fs.writeFileSync(p(model.output.bin[i]), modifiedBin);
+        } else {
+            fs.copyFileSync(p(model.bin[i]), p(model.output.bin[i]));
+        }
+        for (const addition of model.additions) {
+            combineGltf(p(model.output.gltf[i]), p(addition.gltf), p(model.output.gltf[i]));
+            fs.appendFileSync(p(model.output.bin[i]), fs.readFileSync(p(addition.bin)));
+        }
     }
 }

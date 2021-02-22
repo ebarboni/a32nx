@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 @import url('/Fonts/A32NX_Display_Common.css');
 @font-face {
   font-family: "Roboto";
@@ -51,4 +52,21 @@
 
 .magenta {
   fill: var(--mcduMagenta);
+=======
+.scratchpad {
+  margin-top: 20px;
+  margin-left: 20px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.scratchpad-input {
+  flex-grow: 2;
+}
+
+.scratchpad-arrow {
+  flex-grow: 1;
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 }

@@ -25,7 +25,6 @@ var A320_Neo_LowerECAM_Status;
 
         constructor() {
             super();
-            this.frameCount = 0;
             this.isInitialised = false;
             this.statusMessages = {
                 failures: [
@@ -336,6 +335,12 @@ var A320_Neo_LowerECAM_Status;
                             return this.isInop("AUTO_BRK");
                         }
                     },
+                    {
+                        message: "APU",
+                        isActive: () => {
+                            return this.isInop("APU");
+                        }
+                    }
                 ]
             };
             this.inopSystemsMessageArea = new A320_Neo_LowerECAM_Status.StatusMessagePanel(this, "inop-systems", 15, this.inopMessages);
@@ -352,19 +357,20 @@ var A320_Neo_LowerECAM_Status;
             this.inopSysTitle = this.querySelector("#inop-sys-title");
             this.statusMessageArea.init();
             this.inopSystemsMessageArea.init();
+            this.updateThrottler = new UpdateThrottler(500);
             this.isInitialised = true;
         }
         update(_deltaTime) {
             if (!this.isInitialised || !A320_Neo_EICAS.isOnBottomScreen()) {
                 return;
             }
-            this.frameCount++;
-            if (this.frameCount % 8 == 0) {
-                this.statusMessageArea.update();
-                this.inopSystemsMessageArea.update();
-                this.statusNormal.setAttribute("visibility", (this.statusMessageArea.hasActiveFailures || this.inopSystemsMessageArea.hasActiveMessages) ? "hidden" : "visible");
-                this.inopSysTitle.setAttribute("visibility", (this.statusMessageArea.hasActiveFailures || this.inopSystemsMessageArea.hasActiveMessages) ? "visible" : "hidden");
+            if (this.updateThrottler.canUpdate(_deltaTime) === -1) {
+                return;
             }
+            this.statusMessageArea.update();
+            this.inopSystemsMessageArea.update();
+            this.statusNormal.setAttribute("visibility", (this.statusMessageArea.hasActiveFailures || this.inopSystemsMessageArea.hasActiveMessages) ? "hidden" : "visible");
+            this.inopSysTitle.setAttribute("visibility", (this.statusMessageArea.hasActiveFailures || this.inopSystemsMessageArea.hasActiveMessages) ? "visible" : "hidden");
         }
     }
     A320_Neo_LowerECAM_Status.Page = Page;

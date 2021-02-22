@@ -255,6 +255,8 @@ var A320_Neo_LowerECAM_Elec;
             this.setCONNECTION_TR1_DC1_OFF();
             this.setCONNECTION_TR2_DC2_OFF();
 
+            this.updateThrottler = new UpdateThrottler(500);
+
             this.isInitialised = true;
 
             this.updateVariables();
@@ -262,6 +264,9 @@ var A320_Neo_LowerECAM_Elec;
         }
 
         update(_deltaTime) {
+            if (this.updateThrottler.canUpdate(_deltaTime) === -1) {
+                return;
+            }
             this.systemDraw();
         }
 
@@ -282,9 +287,9 @@ var A320_Neo_LowerECAM_Elec;
             this.values.EXTPWR_FREQ = this.getSimVar_Number('EXT_GEN_FREQ');
 
             this.systems.APUGEN = this.getSimVar_ONOFF('APU_GEN_ONLINE');
-            this.values.APUGEN_VOLTS = this.getSimVar_Number('APU_GEN_VOLTAGE');
-            this.values.APUGEN_AMPS = this.getSimVar_Number('APU_GEN_AMPERAGE');
-            this.values.APUGEN_FREQ = this.getSimVar_Number('APU_GEN_FREQ');
+            this.values.APUGEN_VOLTS = this.getSimVar_Number('A32NX_APU_GEN_VOLTAGE');
+            this.values.APUGEN_AMPS = this.getSimVar_Number('A32NX_APU_GEN_AMPERAGE');
+            this.values.APUGEN_FREQ = this.getSimVar_Number('A32NX_APU_GEN_FREQ');
             this.values.APUGEN_LOAD = this.getSimVar_Number('APU_LOAD_PERCENT');
 
             this.systems.GEN1 = this.getSimVar_ONOFF('GEN1_ONLINE');

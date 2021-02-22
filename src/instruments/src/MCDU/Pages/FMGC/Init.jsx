@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+<<<<<<< HEAD
 import { useState } from 'react';
 import { BasePage, McduLabels, McduText } from '../Templates/BasePage.jsx';
 
@@ -27,5 +28,12 @@ const InitPage = () => {
         <BasePage data={text} labels={labels} />
     );
 };
+=======
+const InitPage = () => (
+    <p>
+        INIT
+    </p>
+);
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 
 export { InitPage };

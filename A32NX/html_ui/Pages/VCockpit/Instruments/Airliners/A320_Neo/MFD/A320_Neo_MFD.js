@@ -123,6 +123,9 @@ class A320_Neo_MFD_MainPage extends NavSystemPage {
         this.IsChronoDisplayed = 0;
 
         this.electricity = this.gps.getChildById("Electricity");
+
+        this.mapUpdateThrottler = new UpdateThrottler(this.screenIndex == 1 ? 100 : 400);
+        this.updateThrottler = new UpdateThrottler(this.screenIndex == 1 ? 300 : 500);
     }
     displayChronoTime() {
         const totalSeconds = this.getTotalChronoSeconds();
@@ -164,9 +167,17 @@ class A320_Neo_MFD_MainPage extends NavSystemPage {
             this.selfTestLastKnobValue = currentKnobValue;
             return;
         }
-        const _deltaTime = this.getDeltaTime();
+        let _deltaTime = this.getDeltaTime();
         super.onUpdate(_deltaTime);
-        this.updateMap(_deltaTime);
+        const mapDeltaTime = this.mapUpdateThrottler.canUpdate(_deltaTime);
+        if (mapDeltaTime != -1) {
+            this.updateMap(mapDeltaTime);
+        }
+        _deltaTime = this.updateThrottler.canUpdate(_deltaTime);
+        const KnobChanged = (currentKnobValue >= 0.1 && this.selfTestLastKnobValue < 0.1);
+        if (_deltaTime === -1 && !KnobChanged) {
+            return;
+        }
         this.updateNDInfo(_deltaTime);
 
         //TCAS
@@ -221,8 +232,6 @@ class A320_Neo_MFD_MainPage extends NavSystemPage {
 
         const ACPowerStateChange = SimVar.GetSimVarValue("L:ACPowerStateChange","Bool");
         const ACPowerAvailable = SimVar.GetSimVarValue("L:ACPowerAvailable","Bool");
-
-        const KnobChanged = (currentKnobValue >= 0.1 && this.selfTestLastKnobValue < 0.1);
 
         if ((KnobChanged || ACPowerStateChange) && ACPowerAvailable && !this.selfTestTimerStarted) {
             this.selfTestDiv.style.display = "block";
@@ -575,10 +584,15 @@ class A320_Neo_MFD_Compass extends NavSystemElement {
         const url = document.getElementsByTagName("a320-neo-mfd-element")[0].getAttribute("url");
         this.screenIndex = parseInt(url.substring(url.length - 1));
         this.potIndex = this.screenIndex == 1 ? 89 : 91;
+        this.updateThrottler = new UpdateThrottler(this.screenIndex == 1 ? 20 : 100);
     }
     onEnter() {
     }
     onUpdate(_deltaTime) {
+        _deltaTime = this.updateThrottler.canUpdate(_deltaTime);
+        if (_deltaTime === -1) {
+            return;
+        }
         const currentKnobValue = SimVar.GetSimVarValue("LIGHT POTENTIOMETER:" + this.potIndex, "number");
         if (currentKnobValue <= 0.0) {
             return;
@@ -599,7 +613,36 @@ class A320_Neo_MFD_Map extends MapInstrumentElement {
     constructor() {
         super(...arguments);
         this.zoomRanges = [10, 20, 40, 80, 160, 320];
+        const url = document.getElementsByTagName("a320-neo-mfd-element")[0].getAttribute("url");
+        const screenIndex = parseInt(url.substring(url.length - 1));
+        this.potIndex = screenIndex == 1 ? 89 : 91;
+        this.updateThrottler = new UpdateThrottler(screenIndex === 1 ? 200 : 400);
+        this.mdcuWaypointCheckThrottler = new UpdateThrottler(50);
+        this.lastMcduCurrentFplnWaypointIndex = -1;
     }
+
+    onUpdate(_deltaTime) {
+        const currentKnobValue = SimVar.GetSimVarValue("LIGHT POTENTIOMETER:" + this.potIndex, "number");
+        if (currentKnobValue <= 0.0) {
+            return;
+        }
+
+        // If scrolling through flight plan from MCDU, force update immediately.
+        var forceUpdate = false;
+        if (this.mdcuWaypointCheckThrottler.canUpdate(_deltaTime) !== -1) {
+            const mcduCurrentFplnWaypointIndex = SimVar.GetSimVarValue("L:AIRLINER_MCDU_CURRENT_FPLN_WAYPOINT", "number");
+            if (mcduCurrentFplnWaypointIndex !== this.lastMcduCurrentFplnWaypointIndex) {
+                this.lastMcduCurrentFplnWaypointIndex = mcduCurrentFplnWaypointIndex;
+                forceUpdate = true;
+            }
+        }
+        _deltaTime = this.updateThrottler.canUpdate(_deltaTime);
+        if (!forceUpdate && _deltaTime === -1) {
+            return;
+        }
+        super.onUpdate(_deltaTime);
+    }
+
     updateTopOfDescent() {
         const showTopOfDescent = SimVar.GetSimVarValue("L:AIRLINER_FMS_SHOW_TOP_DSCNT", "number") === 1;
         if (showTopOfDescent) {
@@ -780,10 +823,15 @@ class A320_Neo_MFD_NDInfo extends NavSystemElement {
         const url = document.getElementsByTagName("a320-neo-mfd-element")[0].getAttribute("url");
         this.screenIndex = parseInt(url.substring(url.length - 1));
         this.potIndex = this.screenIndex == 1 ? 89 : 91;
+        this.updateThrottler = new UpdateThrottler(this.screenIndex == 1 ? 200 : 400);
     }
     onEnter() {
     }
     onUpdate(_deltaTime) {
+        _deltaTime = this.updateThrottler.canUpdate(_deltaTime);
+        if (_deltaTime === -1) {
+            return;
+        }
         const currentKnobValue = SimVar.GetSimVarValue("LIGHT POTENTIOMETER:" + this.potIndex, "number");
         if (currentKnobValue <= 0.0) {
             return;

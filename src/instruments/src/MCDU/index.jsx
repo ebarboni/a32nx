@@ -5,10 +5,18 @@ import {
     useUpdate,
     getSimVar,
 } from '../util.mjs';
+<<<<<<< HEAD
 import './style.scss';
 import Titlebar from './Titlebar/Titlebar.jsx';
 import PagesContainer from './PagesContainer.jsx';
 import Scratchpad from './Scratchpad/Scratchpad.jsx';
+=======
+import './styles.scss';
+import Titlebar from './Titlebar/Titlebar.jsx';
+import PagesContainer from './Pages/PagesContainer.tsx';
+import Scratchpad from './Scratchpad/Scratchpad.jsx';
+import { RootContext } from './RootContext.jsx';
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
 
 // TODO: Move anything dependent on ac power change to A32NX_Core
 function powerAvailable() {
@@ -32,12 +40,30 @@ function SelfTest() {
 }
 
 function Idle() {
+<<<<<<< HEAD
     return (
         <svg className="main-wrapper" viewBox="0 0 1024 1024" width="1024" height="1024">
             <Titlebar />
             <PagesContainer />
             <Scratchpad />
         </svg>
+=======
+    const [scratchpad, setScratchpad] = useState('SCRATCHPAD');
+    const [title, setTitle] = useState('TITLE FIELD');
+
+    return (
+        <div className="mcdu-outer">
+            <RootContext.Provider value={[scratchpad, setScratchpad, title, setTitle]}>
+                <div className="mcdu-inner">
+                    <Titlebar />
+                    <div className="mcdu-content">
+                        <PagesContainer />
+                    </div>
+                    <Scratchpad />
+                </div>
+            </RootContext.Provider>
+        </div>
+>>>>>>> 223eb6a6c0ab6aff23e2a87066d2a3f2c1e9385f
     );
 }
 

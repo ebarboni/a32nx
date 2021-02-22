@@ -98,16 +98,13 @@ class A320_Neo_EICAS extends Airliners.BaseEICAS {
         this.PrevFailPage = -1;
 
         this.topSelfTestDiv = this.querySelector("#TopSelfTest");
-        this.topSelfTestTimer = -1;
-        this.topSelfTestTimerStarted = false;
-        this.topSelfTestLastKnobValue = 1;
+        this.selfTestTimer = -1;
+        this.selfTestTimerStarted = false;
+        this.selfTestLastKnobValue = 1;
 
         this.doorVideoWrapper = this.querySelector("#door-video-wrapper");
 
         this.bottomSelfTestDiv = this.querySelector("#BottomSelfTest");
-        this.bottomSelfTestTimer = -1;
-        this.bottomSelfTestTimerStarted = false;
-        this.bottomSelfTestLastKnobValue = 1;
 
         this.upperEngTestDiv = this.querySelector("#Eicas1EngTest");
         this.lowerEngTestDiv = this.querySelector("#Eicas2EngTest");
@@ -136,13 +133,21 @@ class A320_Neo_EICAS extends Airliners.BaseEICAS {
         SimVar.SetSimVarValue("LIGHT POTENTIOMETER:93", "FLOAT64", 0.1);
 
         this.ecamAllButtonPrevState = false;
+        this.updateThrottler = new UpdateThrottler(500);
     }
 
     onUpdate() {
-        const _deltaTime = this.getDeltaTime();
+        let _deltaTime = this.getDeltaTime();
 
         super.onUpdate(_deltaTime);
 
+        const selfTestCurrentKnobValue = SimVar.GetSimVarValue(this.isTopScreen ? "LIGHT POTENTIOMETER:92" : "LIGHT POTENTIOMETER:93", "number");
+        const knobChanged = (selfTestCurrentKnobValue >= 0.1 && this.selfTestLastKnobValue < 0.1);
+
+        _deltaTime = this.updateThrottler.canUpdate(_deltaTime);
+        if (_deltaTime === -1 && !knobChanged) {
+            return;
+        }
         this.updateDoorVideoState();
 
         this.updateAnnunciations();
@@ -178,53 +183,37 @@ class A320_Neo_EICAS extends Airliners.BaseEICAS {
         updateDisplayDMC("EICAS2", this.lowerEngTestDiv, this.lowerEngMaintDiv);
 
         /**
-         * Self test on top ECAM screen
+         * Self test on ECAM screen
          **/
 
-        const topSelfTestCurrentKnobValue = SimVar.GetSimVarValue("LIGHT POTENTIOMETER:92", "number");
-
-        if (((topSelfTestCurrentKnobValue >= 0.1 && this.topSelfTestLastKnobValue < 0.1) || ACPowerStateChange) && isACPowerAvailable && !this.topSelfTestTimerStarted) {
-            this.topSelfTestDiv.style.visibility = "visible";
-            this.topSelfTestTimer = parseInt(NXDataStore.get("CONFIG_SELF_TEST_TIME", "15"));
-            this.topSelfTestTimerStarted = true;
+        if ((knobChanged || ACPowerStateChange) && isACPowerAvailable && !this.selfTestTimerStarted) {
+            if (this.isTopScreen) {
+                this.topSelfTestDiv.style.visibility = "visible";
+            } else {
+                this.bottomSelfTestDiv.style.visibility = "visible";
+            }
+            this.selfTestTimer = parseInt(NXDataStore.get("CONFIG_SELF_TEST_TIME", "15"));
+            this.selfTestTimerStarted = true;
         }
 
-        if (this.topSelfTestTimer >= 0) {
-            this.topSelfTestTimer -= _deltaTime / 1000;
-            if (this.topSelfTestTimer <= 0) {
-                this.topSelfTestDiv.style.visibility = "hidden";
-                this.topSelfTestTimerStarted = false;
+        if (this.selfTestTimer >= 0) {
+            this.selfTestTimer -= _deltaTime / 1000;
+            if (this.selfTestTimer <= 0) {
+                if (this.isTopScreen) {
+                    this.topSelfTestDiv.style.visibility = "hidden";
+                } else {
+                    this.bottomSelfTestDiv.style.visibility = "hidden";
+                }
+                this.selfTestTimerStarted = false;
             }
         }
 
-        this.topSelfTestLastKnobValue = topSelfTestCurrentKnobValue;
-
-        /**
-         * Self test on bottom ECAM screen
-         **/
-
-        const bottomSelfTestCurrentKnobValue = SimVar.GetSimVarValue("LIGHT POTENTIOMETER:93", "number");
-
-        if (((bottomSelfTestCurrentKnobValue >= 0.1 && this.bottomSelfTestLastKnobValue < 0.1) || ACPowerStateChange) && isACPowerAvailable && !this.bottomSelfTestTimerStarted) {
-            this.bottomSelfTestDiv.style.visibility = "visible";
-            this.bottomSelfTestTimer = parseInt(NXDataStore.get("CONFIG_SELF_TEST_TIME", "15"));
-            this.bottomSelfTestTimerStarted = true;
-        }
-
-        if (this.bottomSelfTestTimer >= 0) {
-            this.bottomSelfTestTimer -= _deltaTime / 1000;
-            if (this.bottomSelfTestTimer <= 0) {
-                this.bottomSelfTestDiv.style.visibility = "hidden";
-                this.bottomSelfTestTimerStarted = false;
-            }
-        }
-
-        this.bottomSelfTestLastKnobValue = bottomSelfTestCurrentKnobValue;
+        this.selfTestLastKnobValue = selfTestCurrentKnobValue;
 
         this.ACPowerLastState = isACPowerAvailable;
 
         // modification start here
-        const currentAPUMasterState = SimVar.GetSimVarValue("FUELSYSTEM VALVE SWITCH:8", "Bool");
+        const currentAPUMasterState = SimVar.GetSimVarValue("L:A32NX_APU_MASTER_SW_ACTIVATED", "Bool");
 
         //Determine displayed page when no button is selected
         const prevPage = this.pageNameWhenUnselected;
@@ -236,7 +225,7 @@ class A320_Neo_EICAS extends Airliners.BaseEICAS {
         const rightThrottleDetent = Simplane.getEngineThrottleMode(1);
         const highestThrottleDetent = (leftThrottleDetent >= rightThrottleDetent) ? leftThrottleDetent : rightThrottleDetent;
         const ToPowerSet = (highestThrottleDetent == ThrottleMode.TOGA || highestThrottleDetent == ThrottleMode.FLEX_MCT) && SimVar.GetSimVarValue("ENG N1 RPM:1", "Percent") > 15 && SimVar.GetSimVarValue("ENG N1 RPM:2", "Percent") > 15;
-        const APUPctRPM = SimVar.GetSimVarValue("APU PCT RPM", "percent");
+        const apuAvailable = SimVar.GetSimVarValue("L:A32NX_APU_AVAILABLE", "Bool");
         const EngModeSel = SimVar.GetSimVarValue("L:XMLVAR_ENG_MODE_SEL", "number");
         const spoilerOrFlapsDeployed = SimVar.GetSimVarValue("FLAPS HANDLE INDEX", "number") != 0 || SimVar.GetSimVarValue("SPOILERS HANDLE POSITION", "percent") != 0;
 
@@ -255,11 +244,11 @@ class A320_Neo_EICAS extends Airliners.BaseEICAS {
                 this.MainEngineStarterOffTimer -= _deltaTime / 1000;
             }
             this.pageNameWhenUnselected = "ENG";
-        } else if (currentAPUMasterState && (APUPctRPM <= 95 || this.ApuAboveThresholdTimer >= 0)) {
-            // Show Apu when master sw. is on, and N% is lower than 95, or until 10s after N% over 95
-            if (this.ApuAboveThresholdTimer <= 0 && APUPctRPM <= 95) {
+        } else if (currentAPUMasterState && (!apuAvailable || this.ApuAboveThresholdTimer >= 0)) {
+            // Show APU on Lower ECAM until 10s after it became available.
+            if (this.ApuAboveThresholdTimer <= 0 && !apuAvailable) {
                 this.ApuAboveThresholdTimer = 10;
-            } else if (APUPctRPM >= 95) {
+            } else if (apuAvailable) {
                 this.ApuAboveThresholdTimer -= _deltaTime / 1000;
             }
 

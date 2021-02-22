@@ -60,24 +60,22 @@ const MenuPage: React.FC<MenuProps> = ({setPage}) => {
 
     return (
         <>
-            <Column> //TODO find a way to insert
-                <LineHolder>
+            <Column side={"column-left"}>
+                <LineHolder index={1}>
                     <LineOnly value={determineText("FMGC")} color={determineColor("FMGC")} />
                 </LineHolder>
-                <LineHolder>
+                <LineHolder index={2}>
                     <LineOnly value={determineText("ATSU")} color={determineColor("ATSU")} />
                 </LineHolder>
-                <LineHolder>
+                <LineHolder index={3}>
                     <LineOnly value={determineText("AIDS")} color={determineColor("ATSU")} />
                 </LineHolder>
-                <LineHolder>
+                <LineHolder index={4}>
                     <LineOnly value={determineText("CFDS")} color={determineColor("CFDS")} />
                 </LineHolder>
-                <LineHolder />
-                <LineHolder />
             </Column>
-            <Column>
-                <LineHolder>
+            <Column side={"column-right"}>
+                <LineHolder index={1}>
                     <LabelAndLine
                         labelValue={"SELECT\xa0"}
                         lineValue={"NAV B/UP>"}
@@ -85,13 +83,10 @@ const MenuPage: React.FC<MenuProps> = ({setPage}) => {
                         lineSide={lineSides.right}
                     />
                 </LineHolder>
-                <LineHolder />
-                <LineHolder />
-                <LineHolder />
-                <LineHolder>
+                <LineHolder index={5}>
                     <LineOnly value={"OPTIONS>"} side={lineSides.right}/>
                 </LineHolder>
-                <LineHolder>
+                <LineHolder index={6}>
                     <LineOnly value={"RETURN>"} side={lineSides.right} />
                 </LineHolder>
             </Column>

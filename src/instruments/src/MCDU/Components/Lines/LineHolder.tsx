@@ -5,7 +5,7 @@ export type LineHolderProps = {
     index?: number
 }
 
-export const LineHolder: React.FC<LineHolderProps> = ({index, children}) => {
+export const LineHolder: React.FC<LineHolderProps> = ({children}) => {
     if (children) {
         return (
             <div className="line-holder">

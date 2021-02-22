@@ -1,39 +1,30 @@
-import React, {ReactElement, useEffect, useState} from "react";
+import React from "react";
 import "./styles.scss";
-import {LineHolder, LineHolderProps} from "./Lines/LineHolder";
+import {LineHolder} from "./Lines/LineHolder";
 
 type ColumnProps = {
-    side?: string,
-    children?: React.FC<LineHolderProps>
+    side: string
 }
 
-const defaultProps: ColumnProps = {
-    side: "column-left"
-}
-
-const   Column: React.FC<ColumnProps> = ({side, children}) => {
-    const [contents, setContents] = useState(<></>);
-
-    //TODO finish this
-    let test = (React.Children.map(children, (child) => {
-        let currentIndex = 0;
-        if (React.isValidElement(child)) {
-            let {index} = child.props;
-            index = currentIndex;
-        }
-    }))
-    useEffect(() => {
-        setContents(React.Children.map(children, (child) => {
-
-        }));
-    }, [children]);
-    return (
-        <div className={`column-holder ${side}`}>
-            {children}
-        </div>
-    )
-}
-
-Column.defaultProps = defaultProps
+const Column: React.FC<ColumnProps> = ({side, children}) => (
+    <div className={`column-holder ${side}`}>
+        {[1,2,3,4,5,6].map((value) => (
+            <>
+                {() => {
+                    let node = <LineHolder />
+                    for (let child of React.Children.toArray(children)){
+                        if (React.isValidElement(child)) {
+                            const {index} = child.props;
+                            if (value === index) {
+                                node = child;
+                            }
+                        }
+                    }
+                    return node;
+                }}
+            </>
+        ))}
+    </div>
+)
 
 export {Column};

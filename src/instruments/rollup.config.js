@@ -88,6 +88,7 @@ module.exports = fs.readdirSync(`${__dirname}/src`, { withFileTypes: true })
                 template({
                     name,
                     config,
+                    imports: ['/JS/dataStorage.js'],
                     getCssBundle() {
                         return fs.readFileSync(`${TMPDIR}/${name}-gen.css`).toString();
                     },
